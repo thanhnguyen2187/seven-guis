@@ -36,55 +36,80 @@ function CircleDrawer() {
         y: number,
         radius: number,
     }
+    interface IStep {
+        value: ICircle,
+        index: number,
+    }
 
     type Circles = ICircle[]
-    type History = Circles[]
+    type CircleState = Circles
+    type CircleStates = CircleState[]
 
-    const [historyIndex, setHistoryIndex] = useState(0)
     const [clickedIndex, setClickedIndex] = useState(-1)
+    const [circleStatesIndex, setCircleStatesIndex] = useState(0)
+    const [temporalCircleState, setTemporalCircleState] = useState<CircleState>([])
+    const [circleStates, dispatchCircleStates] = useReducer(
+        (
+            states: CircleStates,
+            {
+                index,
+                state,
+                action,
+            } : {
+                index: number,
+                state: Circles,
+                action: string,
+            }
+        ) => {
 
-    // should assume that the
-    // initial state is also an empty array
-    function stepsReducer(
-        circles: Circles,
-        {
-            // type,
-            value,
-            index,
-        } : {
-            value: ICircle,
-            index: number
-        }
-    ) {
-        return circles
-    }
-    const [steps, setSteps] = useReducer()
+            switch (action) {
+                case "add":
+                    return [
+                        ...states,
+                        state,
+                    ]
+                case "modify":
+                    return [
+                        ...states.slice(0, index + 1),
+                        state,
+                    ]
+            }
 
-    function addCircle(
-        circles: Circles,
-        circle: ICircle,
-    ) {
-        return [
-            ...circles,
-            circle
-        ]
+            return states
+        },
+        [[]]
+    )
+
+    function addCircle(circle: ICircle) {
+        dispatchCircleStates({
+            action: "modify",
+            index: circleStatesIndex,
+            state: [
+                ...circleStates[circleStatesIndex],
+                circle
+            ]
+        })
+        setCircleStatesIndex(circleStatesIndex + 1)
     }
 
-    function changeRadius(radius: number) {
-    }
+    // setTemporalCircleState(
+    //     circleStates[
+    //         circleStatesIndex
+    //     ]
+    // )
 
     return <>
         <Space direction={"vertical"}>
             <Space>
                 <Button
-                    disabled={historyIndex === 0}
-                    onClick={() => setHistoryIndex(historyIndex - 1)}
+                    disabled={circleStatesIndex === 0}
+                    onClick={() => setCircleStatesIndex(circleStatesIndex - 1)}
                 >
                     Undo
                 </Button>
                 <Button
-                    disabled={historyIndex === history.length - 1}
-                    onClick={() => setHistoryIndex(historyIndex + 1)}
+                    disabled={circleStatesIndex === circleStates.length - 1}
+                    onClick={() => setCircleStatesIndex(circleStatesIndex + 1)}
                 >
                     Redo
                 </Button>
@@ -97,19 +122,17 @@ function CircleDrawer() {
                     const x = evt.evt.offsetX
                     const y = evt.evt.offsetY
 
-                    // TODO: better logic handling
                     addCircle({
                         x,
                         y,
                         radius: 10,
                     })
                 })}
-                // listening={false}
             >
                 <Layer
                 >
                     {
-                        history[historyIndex].map(
+                        circleStates[circleStatesIndex].map(
                             (circle, index) =>
                                 <Circle
                                     radius={circle.radius}
@@ -142,14 +165,27 @@ function CircleDrawer() {
                     ? <></>
                     : <Slider
                         defaultValue={
-                            history
-                                [historyIndex]
+                            circleStates
+                                [circleStatesIndex]
                                 [clickedIndex]
                                 .radius
                         }
                         onChange={
                             (value: number) => {
-                                changeRadius(value)
+                                setTemporalCircleState(
+                                    [...circleStates[circleStatesIndex]]
+                                )
+                                temporalCircleState[clickedIndex].radius = value
+                            }
+                        }
+                        onAfterChange={
+                            () => {
+                                dispatchCircleStates({
+                                    state: temporalCircleState,
+                                    index: circleStatesIndex,
+                                    action: "modify"
+                                })
+                                setCircleStatesIndex(circleStatesIndex + 1)
                             }
                         }
                     />
