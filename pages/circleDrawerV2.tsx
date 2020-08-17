@@ -159,12 +159,12 @@ function CircleDrawer() {
                     }
                 </Layer>
             </Stage>
-
             {
                 clickedIndex === -1
                     ? <></>
                     : <Slider
                         defaultValue={
+                            // 0
                             circleStates
                                 [circleStatesIndex]
                                 [clickedIndex]
@@ -172,18 +172,51 @@ function CircleDrawer() {
                         }
                         onChange={
                             (value: number) => {
-                                setTemporalCircleState(
-                                    [...circleStates[circleStatesIndex]]
-                                )
-                                temporalCircleState[clickedIndex].radius = value
+                                const _temporalCircleState = [
+                                    ...circleStates[
+                                        circleStatesIndex
+                                    ]
+                                ]
+                                _temporalCircleState[clickedIndex] = {
+                                    ..._temporalCircleState[clickedIndex],
+                                    radius: value,
+                                }
+                                setTemporalCircleState(_temporalCircleState)
+                                // setTemporalCircleState([
+                                //     // the circles before the current selected circle
+                                //     ...circleStates
+                                //         [circleStatesIndex]
+                                //         .slice(
+                                //             0,
+                                //             clickedIndex
+                                //         ),
+                                //     // the selected circle itself
+                                //     {
+                                //         ...circleStates
+                                //             [circleStatesIndex]
+                                //             [clickedIndex],
+                                //         radius: value
+                                //     },
+                                //     //
+                                //     ...circleStates
+                                //         [circleStatesIndex]
+                                //         .slice(
+                                //             circleStatesIndex + 1,
+                                //         )
+                                // ])
+                                // temporalCircleState[clickedIndex].radius = value
+                                // circleStates
+                                //     [circleStatesIndex]
+                                //     [clickedIndex]
+                                //     .radius = value
                             }
                         }
                         onAfterChange={
                             () => {
                                 dispatchCircleStates({
-                                    state: temporalCircleState,
+                                    state: [...temporalCircleState],
                                     index: circleStatesIndex,
-                                    action: "modify"
+                                    action: "modify",
                                 })
                                 setCircleStatesIndex(circleStatesIndex + 1)
                             }
