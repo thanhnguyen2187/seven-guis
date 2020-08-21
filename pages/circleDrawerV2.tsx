@@ -36,6 +36,7 @@ function CircleDrawer() {
         y: number,
         radius: number,
     }
+
     interface IStep {
         value: ICircle,
         index: number,
@@ -55,7 +56,7 @@ function CircleDrawer() {
                 index,
                 state,
                 action,
-            } : {
+            }: {
                 index: number,
                 state: Circles,
                 action: string,
@@ -81,12 +82,15 @@ function CircleDrawer() {
     )
 
     function addCircle(circle: ICircle) {
+        setTemporalCircleState([
+            ...temporalCircleState,
+            circle,
+        ])
         dispatchCircleStates({
             action: "modify",
             index: circleStatesIndex,
             state: [
-                ...circleStates[circleStatesIndex],
-                circle
+                ...temporalCircleState
             ]
         })
         setCircleStatesIndex(circleStatesIndex + 1)
@@ -127,12 +131,16 @@ function CircleDrawer() {
                         y,
                         radius: 10,
                     })
+                    setTemporalCircleState([
+                        ...circleStates[circleStatesIndex]
+                    ])
                 })}
             >
                 <Layer
                 >
                     {
-                        circleStates[circleStatesIndex].map(
+                        // circleStates[circleStatesIndex].map(
+                        temporalCircleState.map(
                             (circle, index) =>
                                 <Circle
                                     radius={circle.radius}
@@ -152,6 +160,9 @@ function CircleDrawer() {
                                         } else {
                                             setClickedIndex(index)
                                         }
+                                        // setTemporalCircleState([
+                                        //     ...circleStates[circleStatesIndex]
+                                        // ])
                                     }}
                                     // listening={false}
                                 />
@@ -165,50 +176,29 @@ function CircleDrawer() {
                     : <Slider
                         defaultValue={
                             // 0
-                            circleStates
-                                [circleStatesIndex]
+                            temporalCircleState
+                                [clickedIndex]
+                                .radius
+                            // circleStates
+                            //     [circleStatesIndex]
+                            //     [clickedIndex]
+                            //     .radius
+                        }
+                        value={
+                            temporalCircleState
                                 [clickedIndex]
                                 .radius
                         }
                         onChange={
                             (value: number) => {
                                 const _temporalCircleState = [
-                                    ...circleStates[
-                                        circleStatesIndex
-                                    ]
+                                    ...circleStates[circleStatesIndex]
                                 ]
                                 _temporalCircleState[clickedIndex] = {
                                     ..._temporalCircleState[clickedIndex],
                                     radius: value,
                                 }
                                 setTemporalCircleState(_temporalCircleState)
-                                // setTemporalCircleState([
-                                //     // the circles before the current selected circle
-                                //     ...circleStates
-                                //         [circleStatesIndex]
-                                //         .slice(
-                                //             0,
-                                //             clickedIndex
-                                //         ),
-                                //     // the selected circle itself
-                                //     {
-                                //         ...circleStates
-                                //             [circleStatesIndex]
-                                //             [clickedIndex],
-                                //         radius: value
-                                //     },
-                                //     //
-                                //     ...circleStates
-                                //         [circleStatesIndex]
-                                //         .slice(
-                                //             circleStatesIndex + 1,
-                                //         )
-                                // ])
-                                // temporalCircleState[clickedIndex].radius = value
-                                // circleStates
-                                //     [circleStatesIndex]
-                                //     [clickedIndex]
-                                //     .radius = value
                             }
                         }
                         onAfterChange={

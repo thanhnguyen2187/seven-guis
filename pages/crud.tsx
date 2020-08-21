@@ -25,6 +25,7 @@ function Crud() {
         name: string,
         surname: string
     }
+
     // const getBackgroundColor = (id: number, currentId: number) =>
     //     id === currentId
     //         ? {"backgroundColor": "green"}
@@ -43,9 +44,10 @@ function Crud() {
 
     // const [people, setPeople] = useState<Array<Person>>([])
     const [people, dispatchPeople] = useReducer(
-        (people: Array<Person>, {type, person}: {type: string, person: Person}) => {
+        // tslint:disable-next-line:no-shadowed-variable
+        (people: Person[], {type, person}: { type: string, person: Person }) => {
             switch (type) {
-                case "add": 
+                case "add":
                     return [...people, {
                         ...person,
                         id: people.length + 1
